@@ -163,3 +163,42 @@ class Car {
 
 let car = Car()
 car.myFunc3(name: "Car")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
