@@ -155,14 +155,63 @@ func f7(n1: Int, n2: Int, closure: (Int, Int) -> Int) -> Int{
 print(f7(n1: 3, n2: 4) { return $0 + $1 })
 
 
-class Car {
-    func myFunc3(name: String) {
-        print("Hello \(name)")
-    }
+/*
+ 
+ 
+ var/let имя_замыкания: тип = {
+ 
+ }
+ 
+ */
+
+let printHello: () -> Void = {
+    print("Hello")
 }
 
-let car = Car()
-car.myFunc3(name: "Car")
+let printNumber: (Int) -> Void = { number in
+    print(number)
+}
+printNumber(4)
+
+let printNumber2: (Int) -> Void = {
+    print($0)
+}
+printNumber(5)
+
+let multiply: (Int, Int) -> Int = { num1, num2 in
+    return num1 * num2
+}
+
+
+let numbers = [41, 32, 23, 34]
+print(numbers.sorted(by: { (num1, num2) -> Bool in
+    num1 / 10 < num2 / 10
+}))
+
+var a: (Int) -> Int = {
+    return $0
+}
+
+let printHello3 = printHello
+printHello3()
+
+
+func applyClosure(num: Int, closure: (Int) -> Int) -> Int {
+    return closure(num)
+}
+
+let closure1: (Int) -> Int = {
+    return $0 + 1
+}
+
+let closure2: (Int) -> Int = {
+    return $0 + 2
+}
+
+print(applyClosure(num: 10, closure: closure1))
+print(applyClosure(num: 10, closure: closure2))
+print(applyClosure(num: 10, closure: { return $0 + 2 }))
+print(applyClosure(num: 10, closure: { return $0 + 3 }))
 
 
 
