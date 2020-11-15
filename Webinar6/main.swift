@@ -161,3 +161,39 @@ func equal<T: HasId>(_ item1: T, _ item2: T) -> Bool {
 print(equal(item1, item2))
 print(equal(item1, item3))
 print(equal(item2, item3))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
