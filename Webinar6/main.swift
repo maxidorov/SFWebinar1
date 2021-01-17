@@ -1,6 +1,6 @@
 //
 //  main.swift
-//  Webinar6 Helper
+//  Webinar6
 //
 //  Created by Maxim V. Sidorov on 11/15/20.
 //
@@ -8,28 +8,37 @@
 import Foundation
 
 // Протоколы
- 
+
 protocol TeacherProtocol: class {
-    var students: [StudentProtocol & HasName] { get set }
+    var students: [StudentProtocol] { get set }
 }
 
 protocol StudentProtocol: class {
-    var teacher: (TeacherProtocol & HasName)? { get set }
+    var teacher: TeacherProtocol? { get set }
 }
 
-protocol HasName: class {
-    var name: String { get }
+protocol HasName {
+    var name: String { get set }
 }
 
 extension HasName {
     func greeting() -> String {
-        return "Hi, I am \(name)!"
+        return "Hello, I am \(name)"
     }
 }
 
+class Teacher: TeacherProtocol, HasName {
+    var students: [StudentProtocol]
+    var name: String
+    
+    init(name: String, students: [StudentProtocol]) {
+        self.name = name
+        self.students = students
+    }
+}
 
 class Student: StudentProtocol, HasName {
-    weak var teacher: (TeacherProtocol & HasName)?
+    weak var teacher: TeacherProtocol?
     var name: String
     
     init(name: String) {
@@ -37,43 +46,54 @@ class Student: StudentProtocol, HasName {
     }
 }
 
-class Teacher: TeacherProtocol, HasName {
-    var students: [StudentProtocol & HasName]
-    var name: String
-    
-    init(name: String, students: [StudentProtocol & HasName]) {
-        self.name = name
-        self.students = students
-    }
-}
 
 let student1 = Student(name: "Vasya")
 let student2 = Student(name: "Petya")
 let student3 = Student(name: "Kolya")
 
-let group: [StudentProtocol & HasName] = [student1, student2, student3]
 
-let teacher: (TeacherProtocol & HasName) = Teacher(name: "Misha", students: group)
+let group = [student1, student2, student3]
 
-group.forEach { (student) in
+let teacher = Teacher(name: "Ivan", students: group)
+
+print(student1.teacher) // nil
+
+group.forEach { student in
     student.teacher = teacher
 }
 
-print(student1.teacher?.name ?? "student1 has not teacher")
-print(student2.teacher?.name ?? "student2 has not teacher")
-print(student3.teacher?.name ?? "student3 has not teacher")
+print(student1.teacher) // не nil
 
-
-for (i, student) in teacher.students.enumerated() {
-    print("Name of the student\(i + 1) is \(student.name)")
+group.forEach { student in
+    print(student.name)
 }
 
-print(student1.greeting())
-print(teacher.greeting())
+print(teacher.name)
+
+let persons: [HasName] = [teacher, student1, student2, student3]
+
+print("------------")
+
+persons.forEach { person in
+    print(person.greeting())
+}
 
 
-print("---------------------")
+protocol Hello { }
+extension Hello {
+    func hello() {
+        print("hello")
+    }
+}
+
+class A: Hello { }
+let a = A()
+a.hello()
+
+
 // Исключения
+print("------------")
+
 
 enum ATMError: String, LocalizedError {
     case notEnoughCash = "Not enough cash"
@@ -81,16 +101,18 @@ enum ATMError: String, LocalizedError {
     case incorrectPin = "Incorrect pin"
     
     var errorDescription: String? {
-        return self.rawValue.replacingOccurrences(of: " ", with: "_").uppercased()
+        return self.rawValue
     }
 }
 
 class ATM {
     func makeOperation(pin: String) throws -> Bool {
-        if pin == "1234" {
+        if pin == "1234" { // проверка
+            // ....
             return true
         }
         throw ATMError.incorrectPin
+//        return false
     }
 }
 
@@ -98,50 +120,76 @@ let atm = ATM()
 var success: Bool = false
 
 do {
+    //...
     try success = atm.makeOperation(pin: "1235")
 } catch {
-    if let error = error as? LocalizedError {
-        print("Error: \(error.errorDescription ?? "no description")")
+    if let error = error as? ATMError {
+        switch error {
+        case .incorrectPin:
+            print("YOU PIN CODE IS INCORRECT")
+            print(error.errorDescription ?? "nil")
+        case .notEnoughCash:
+            print(error.errorDescription ?? "nil")
+        case .notEnoughDeposit:
+        print(error.errorDescription ?? "nil")
+        }
     }
 }
 
 if success {
-    print("Operation complete!")
+    print("Operation completed")
 }
 
-print("---------------------")
-// Generics
-
+// Generic
+print("------------")
 
 func sum(_ a: Int, _ b: Int) -> Int {
     return a + b
 }
 
-print(sum(3, 5))
-//print(sum(3, 5.0)) // ошибка
+func sum(_ a: Int, _ b: Double) -> Double {
+    return Double(a) + b
+}
+
+func sum(_ a: Double, _ b: Int) -> Double {
+    return a + Double(b)
+}
+
+print(sum(1, 2))
+print(sum(1, 5.5))
+print(sum(1.5, 5))
 
 
-func sumNumeric<T: Numeric>(_ a: T, _ b: T) -> T {
+func sumNumbers<T: Numeric>(_ a: T, _ b: T) -> T {
     return a + b
 }
 
-let c = sumNumeric(0.1, 2)
-print(c)
+print(sumNumbers(1, 2))
+print(sumNumbers(1.5, 2))
+print(sumNumbers(1, 2.5))
 
-
-protocol HasId {
-    var id: Int { get }
+func equal<T: Equatable>(_ a: T, _ b: T) -> Bool {
+    return a == b
 }
 
+print(equal(1.1, 1))
+print(equal(1, 2))
+print(equal("str", "string"))
+
+
 enum Color {
-    case red
+    case req
     case green
     case blue
 }
 
-class Item: HasId {
-    let id: Int
-    let color: Color
+protocol HasId {
+    var id: Int { get set }
+}
+
+class Tshirt: HasId {
+    var id: Int
+    var color: Color
     
     init(id: Int, color: Color) {
         self.id = id
@@ -149,15 +197,36 @@ class Item: HasId {
     }
 }
 
-let item1 = Item(id: 1, color: .red)
-let item2 = Item(id: 2, color: .green)
-let item3 = Item(id: 2, color: .blue)
 
+let item1 = Tshirt(id: 1, color: .blue)
+let item2 = Tshirt(id: 2, color: .green)
+let item3 = Tshirt(id: 2, color: .req)
 
-func equal<T: HasId>(_ item1: T, _ item2: T) -> Bool {
-    return item1.id == item2.id
+func equalTshirts(_ a: Tshirt, _ b: Tshirt) -> Bool {
+    return a.id == b.id
 }
 
-print(equal(item1, item2))
-print(equal(item1, item3))
-print(equal(item2, item3))
+print("------------")
+print(equalTshirts(item1, item2))
+print(equalTshirts(item1, item3))
+print(equalTshirts(item2, item3))
+
+
+func equalItems<T: HasId>(_ a: T, _ b: T) -> Bool {
+    return a.id == b.id
+}
+
+print("------------")
+print(equalItems(item1, item2))
+print(equalItems(item1, item3))
+print(equalItems(item2, item3))
+
+
+func == (_ a: HasId, _ b: HasId) -> Bool {
+    return a.id == b.id
+}
+
+print("------------")
+print(item1 == item2)
+print(item1 == item3)
+print(item2 == item3)
